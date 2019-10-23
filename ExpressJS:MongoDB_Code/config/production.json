@@ -1,0 +1,6 @@
+{
+  "name": "This app is working on production mode",
+  "host": {
+    "mail": "production mode"
+  }
+}
