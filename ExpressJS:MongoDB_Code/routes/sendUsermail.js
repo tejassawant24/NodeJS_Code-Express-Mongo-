@@ -38,7 +38,7 @@ router.post('/usermail', async (req, res) => {
             auth: {
                 //this will be the account through which we will send update password link
                 user: "sawanttejas27@gmail.com",
-                pass: "tejas123"
+                pass: "deepali123"
             }
 
         });
@@ -54,7 +54,7 @@ router.post('/usermail', async (req, res) => {
 
         let mailOptions = {
             from: '"TS Apps: sweat_smile:" <sawanttejas27gmail.com', //sender address
-            to: userEmail.email,
+            to: userEmail.userLogin.userEmail,
             subject: "Reset Your Password",
             text: "Open this link to change your password http://localhost:4200/forgotpassword/" +
                 token

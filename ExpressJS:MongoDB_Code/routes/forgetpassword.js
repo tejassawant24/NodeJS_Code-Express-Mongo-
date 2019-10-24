@@ -6,12 +6,12 @@ const joi = require('@hapi/joi');
 router.post('/userpassword/:token', async (req, res) => {
     try {
         let user = await Model.User.findOne({
-            resetPasswordtoken: req.params.token,
+            resetPasswordToken: req.params.token,
             resetPasswordExpire: {
                 $gt: Date.now()
             }
         })
-
+        console.log(user);
 
         if (!user) {
             return res.status(401).send('invalid token id');
@@ -48,11 +48,11 @@ router.post('/userpassword/:token', async (req, res) => {
 });
 
 function ValidationError(error) {
-    let Schema = {
+    let Schema = joi.object().keys({
         userLogin: {
             userPassword: joi.string().required()
         }
-    }
+    })
     return Schema.validate(error);
 }
 
