@@ -3,8 +3,9 @@ const router = express.Router();
 const joi = require('@hapi/joi');
 const bcrypt = require('bcryptjs');
 const U = require('../mongo/MeanStack_Project_DB/user');
+let auth = require('../middleware/auth')
 
-router.post('/auth', async (req, res) => {
+router.post('/auth', auth, async (req, res) => {
     let {
         error
     } = LoginValidationError(req.body);

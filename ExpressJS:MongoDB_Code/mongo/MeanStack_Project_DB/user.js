@@ -60,7 +60,8 @@ let UserSchema = new mongoose.Schema({
 
 UserSchema.methods.UserValidToken = function () {
     let token = jwt.sign({
-        _id: this._id
+        _id: this._id,
+        isAdmin: this.isAdmin
     }, config.get('usertoken'));
     return token;
 };
