@@ -6,12 +6,16 @@ let user = require('../ExpressJS:MongoDB_Code/routes/MeanStack_Project_Middlewar
 let auth = require('./auth/auth');
 //Forget Password
 let mailer = require('../ExpressJS:MongoDB_Code/routes/sendUsermail');
-let forgetPassword = require('../ExpressJS:MongoDB_Code/routes/forgetpassword');
+let forgetPassword = require('./routes/forgotpassword');
+
+//Product Info
+let product = require('./routes/MeanStack_Project_Middleware/productInfo.routes')
 
 app.use('/api/consumer', user);
 app.use('/api/consumer', auth);
-app.use('/api/chat', mailer);
-app.use('/api/chat', forgetPassword);
+app.use('/api/consumer/chat', mailer);
+app.use('/api/consumer/chat', forgetPassword);
+app.use('/api', product);
 
 //If user does not have token
 if (!config.get('usertoken')) {

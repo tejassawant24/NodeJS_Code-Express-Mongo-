@@ -70,19 +70,15 @@ let productSchema = new mongoose.Schema({
 })
 
 //Create Model for Wrapping
-let Product = mongoose.model('productInfo', subCathegorySchema, cathegorySchema, productSchema);
+let Product = mongoose.model('productInfo', productSchema);
+let subCathegory = mongoose.model('subcathegory', subCathegorySchema);
+let Cathegory = mongoose.model('cathegory', cathegorySchema);
 
 //Express API Validation
-function subCathegoryValidationError(message) {
-    let Schema = joi.object().keys({
-        name: joi.string().required()
-    })
-    return Schema.validate(message);
-}
-
 function cathegoryValidationError(message) {
     let Schema = joi.object().keys({
         catName: joi.string().required(),
+        subCat: joi.required()
     })
     return Schema.validate(message);
 }
@@ -100,14 +96,15 @@ function productValidationError(message) {
         subCathegory: joi.string().required(),
         isAdmin: joi.boolean().required(),
         recordDate: joi.date().default(Date.now()),
-        updateDate: joi.date().default(Date.now()),
+        updateDate: joi.date().default(Date.now())
     })
     return Schema.validate(message);
 }
 
 module.exports = {
     Product,
-    subCathegoryValidationError,
+    subCathegory,
+    Cathegory,
     cathegoryValidationError,
     productValidationError
 };

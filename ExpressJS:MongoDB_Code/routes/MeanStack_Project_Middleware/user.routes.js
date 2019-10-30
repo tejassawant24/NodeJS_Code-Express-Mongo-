@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 let U = require("../../mongo/MeanStack_Project_DB/user");
 
 router.get("/alluser", async (req, res) => {
-    let user = await U.User.find({});
+    let user = await U.User.find({}).select('-userLogin.userPassword');
     if (!user)
         res.status(402).send({
             message: "No data found"
