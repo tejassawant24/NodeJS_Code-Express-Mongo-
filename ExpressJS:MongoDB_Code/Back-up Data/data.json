@@ -1,0 +1,11 @@
+{
+    "firstName": "Tejas",
+    "lastName": "Sawant",
+    "newsLetterCheck": true,
+    "userLogin": {
+        "userEmail": "sawanttejas27@gmail.com",
+        "userPassword": "tejas123"
+    },
+    "termsAcceptCheck": true,
+    "isAdmin": true
+}
