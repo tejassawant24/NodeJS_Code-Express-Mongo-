@@ -75,10 +75,17 @@ let subCathegory = mongoose.model('subcathegory', subCathegorySchema);
 let Cathegory = mongoose.model('cathegory', cathegorySchema);
 
 //Express API Validation
+function subCathegoryValidationError(message) {
+    let Schema = joi.object().keys({
+        name: joi.string().required()
+    })
+    return Schema.validate(message)
+}
+
 function cathegoryValidationError(message) {
     let Schema = joi.object().keys({
         catName: joi.string().required(),
-        subCat: joi.required()
+        subCatId: joi.required()
     })
     return Schema.validate(message);
 }
@@ -106,5 +113,6 @@ module.exports = {
     subCathegory,
     Cathegory,
     cathegoryValidationError,
-    productValidationError
+    productValidationError,
+    subCathegoryValidationError
 };

@@ -1,16 +1,136 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const admin = require("../../middleware/admin");
-let product = require('../../mongo/MeanStack_Project_DB/product');
+let product = require("../../mongo/MeanStack_Project_DB/product");
 
-router.post("/addCathegory", [auth, admin], async (req, res) => {});
+router.post("/addSubcathegory", async (req, res) => {
+  let {
+    error
+  } = product.subCathegoryValidationError(req.body);
+  if (error) {
+    return res.status(402).send(error.details[0].message);
+  }
 
-router.get("/allCathegory", [auth], async (req, res) => {});
+  //To get rid of  duplicate items
+  let data = await product.subCathegory.findOne({
+    name: req.body.name
+  });
 
-router.get("/findCathegoryById/:id", [auth, admin], async (req, res) => {});
 
-router.delete("/deleteCathegoryById/:id", [auth, admin], async (req, res) => {});
+  if (data) {
+    return res.status(402).send({
+      message: "Subcathegory already Exists"
+    });
+  }
+
+  //Adding new subCathegories 
+  let subCat = new product.subCathegory({
+    name: req.body.name
+  });
+
+  //Saving Data
+  let item = await subCat.save();
+  res.send({
+    message: "Added Successfully",
+    data: item
+  });
+});
+router.post("/addCathegory", async (req, res) => {
+  let {
+    error
+  } = await product.cathegoryValidationError(req.body);
+  if (error) {
+    return res.status(402).send(error.details[0].message)
+  }
+
+  //Getting rid of duplicate cathegories
+  let dupCat = await product.Cathegory.findOne({
+    'catName': req.body.catName
+  });
+
+
+  if (dupCat) {
+    return res.status(402).send({
+      message: 'Category already exists'
+    })
+  }
+  console.log(dupCat); //dupCat should be null
+
+
+  let subCat = await product.subCathegory.findOne({
+    '_id': req.body.subCatId
+  });
+
+  console.log(subCat); //subCat should be null
+  if (!subCat) {
+    return res.status(402).send('invalid Subcategory id')
+  }
+  //Adding new Category
+  let category = new product.Cathegory({
+    catName: req.body.catName,
+    subCat: {
+      _id: subCat._id,
+      name: subCat.name
+    }
+  });
+
+  //Saving Data
+  let items = await category.save();
+
+  res.send({
+    message: 'Category Added sucessfully',
+    data: items
+  })
+});
+
+router.get("/allCathegory", async (req, res) => {
+  let allCat = await product.Cathegory.find({});
+
+  if (!allCat) {
+    return res.status(402).send({
+      message: "No data found!!"
+    });
+  }
+
+  res.send(allCat);
+});
+
+router.get("/findCathegoryById/:_id", async (req, res) => {
+  let findCat = await product.Cathegory.findById(req.params._id);
+
+  if (!findCat) {
+    return res.status(402).send({
+      message: 'no data found!!'
+    })
+  }
+
+  res.send(findCat);
+});
+
+router.delete("/deleteCathegoryById/:_id", async (req, res) => {
+  let Cat = await product.Cathegory.findOne({
+    _id: req.params._id
+  });
+
+  if (!Cat) {
+    return res.status(402).send({
+      message: "invalid id"
+    });
+  }
+  let delCat = await product.Cathegory.findByIdAndRemove({
+    _id: req.params._id
+  });
+
+
+  //Saving Data
+  let items = await delCat.save();
+  res.send({
+    message: "delete Successful",
+    data: items
+  });
+
+});
 
 router.post("/addProduct", [auth, admin], async (req, res) => {
   let {
@@ -22,9 +142,9 @@ router.post("/addProduct", [auth, admin], async (req, res) => {
 
   let item = await product.Product.findOne({
     name: req.body.name
-  })
+  });
   if (item) {
-    return res.status(402).send('product already exists')
+    return res.status(402).send("product already exists");
   }
 
   let prodData = new product.Product({
@@ -45,13 +165,12 @@ router.post("/addProduct", [auth, admin], async (req, res) => {
   //Saving Data
   let data = await prodData.save();
   res.send({
-    message: 'product added succesfully',
+    message: "product added succesfully",
     data: data
   });
-
 });
 
-router.put('/updateProduct/:_id', async (req, res) => {
+router.put("/updateProduct/:_id", async (req, res) => {
   let {
     error
   } = product.productValidationError(req.body);
@@ -59,10 +178,10 @@ router.put('/updateProduct/:_id', async (req, res) => {
     return res.status(402).send(error.details[0].message);
   }
   let productUpdate = await product.Product.findOne({
-    '_id': req.params._id
+    _id: req.params._id
   });
   if (!product) {
-    return res.status(402).send('Invalid id');
+    return res.status(402).send("Invalid id");
   }
 
   productUpdate.name = req.body.name;
@@ -81,16 +200,49 @@ router.put('/updateProduct/:_id', async (req, res) => {
   //Saving Data
   let items = await productUpdate.save();
   res.send({
-    message: 'Updated Successfully',
+    message: "Updated Successfully",
     data: items
-  })
+  });
 });
 
-// router.delete("/removeProduct/:id", [auth, admin], async (req, res) => {});
+router.delete("/removeProduct/:_id", async (req, res) => {
+  let productDelete = await product.Product.findOne({
+    _id: req.params._id
+  });
+  if (!productDelete) {
+    return res.send({
+      message: "Invalid id"
+    });
+  }
+  let data = await productDelete.findByIdAndRemove({
+    _id: req.params._id
+  });
 
-// router.get("/pageIndexPagination", async (req, res) => {});
+  //Saving data
+  let item = await data.save();
+  res.send({
+    message: "Deleted Successfully",
+    data: items
+  });
+});
 
-// router.get("/findProductById", async (req, res) => {});
+router.get("/findProductById/:_id", async (req, res) => {
+  let prodfind = await product.Product.findOne({
+    _id: req.params._id
+  });
+  if (!prodfind) {
+    return res.status(402).send({
+      message: "Invalid id"
+    });
+  }
+
+  let items = await prodfind.save();
+  res.send(items);
+});
+
+router.get("/pageIndexPagination", async (req, res) => {});
+
+
 
 // router.get("/Cathegory/:Cathegory/Page/:pageIdx", async (req, res) => {});
 

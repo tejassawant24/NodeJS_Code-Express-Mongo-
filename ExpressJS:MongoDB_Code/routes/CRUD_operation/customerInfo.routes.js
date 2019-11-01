@@ -5,7 +5,7 @@ let U = require("../../mongo/CRUD_operation/customer");
 //Create API
 
 //API to add new user
-router.post("/newcustomer", async (req, res) => {
+router.post('/newcustomer', async (req, res) => {
     let {
         error
     } = U.ValidationError(req.body);
@@ -42,7 +42,7 @@ router.post("/newcustomer", async (req, res) => {
     });
 });
 
-router.put("/updatecustomer/:id", async (req, res) => {
+router.put('/updatecustomer/:id', async (req, res) => {
     let {
         error
     } = U.ValidationError(req.body);
