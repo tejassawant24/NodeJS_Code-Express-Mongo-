@@ -2,19 +2,19 @@ const mongoose = require('mongoose');
 let joi = require('@hapi/joi');
 
 //Create Database Structure
-let subCathegorySchema = new mongoose.Schema({
+let subCategorySchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     }
 })
-let cathegorySchema = new mongoose.Schema({
+let categorySchema = new mongoose.Schema({
     catName: {
         type: String,
         required: true
     },
     subCat: {
-        type: subCathegorySchema,
+        type: subCategorySchema,
         required: true
     }
 })
@@ -47,11 +47,11 @@ let productSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-    Cathegory: {
+    Category: {
         type: String,
         required: true
     },
-    subCathegory: {
+    subCategory: {
         type: String,
         required: true
     },
@@ -71,18 +71,18 @@ let productSchema = new mongoose.Schema({
 
 //Create Model for Wrapping
 let Product = mongoose.model('productInfo', productSchema);
-let subCathegory = mongoose.model('subcathegory', subCathegorySchema);
-let Cathegory = mongoose.model('cathegory', cathegorySchema);
+let subCategory = mongoose.model('subcathegory', subCategorySchema);
+let Category = mongoose.model('cathegory', categorySchema);
 
 //Express API Validation
-function subCathegoryValidationError(message) {
+function subCategoryValidationError(message) {
     let Schema = joi.object().keys({
         name: joi.string().required()
     })
     return Schema.validate(message)
 }
 
-function cathegoryValidationError(message) {
+function categoryValidationError(message) {
     let Schema = joi.object().keys({
         catName: joi.string().required(),
         subCatId: joi.required()
@@ -99,8 +99,8 @@ function productValidationError(message) {
         offerPrice: joi.number().required(),
         isAvailable: joi.boolean().required(),
         isTodayOffer: joi.boolean().required(),
-        Cathegory: joi.string().required(),
-        subCathegory: joi.string().required(),
+        Category: joi.string().required(),
+        subCategory: joi.string().required(),
         isAdmin: joi.boolean().required(),
         recordDate: joi.date().default(Date.now()),
         updateDate: joi.date().default(Date.now())
@@ -110,9 +110,9 @@ function productValidationError(message) {
 
 module.exports = {
     Product,
-    subCathegory,
-    Cathegory,
-    cathegoryValidationError,
+    subCategory,
+    Category,
+    categoryValidationError,
     productValidationError,
-    subCathegoryValidationError
+    subCategoryValidationError
 };

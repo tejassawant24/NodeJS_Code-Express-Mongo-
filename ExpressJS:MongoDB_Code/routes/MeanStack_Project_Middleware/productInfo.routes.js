@@ -4,28 +4,28 @@ const auth = require("../../middleware/auth");
 const admin = require("../../middleware/admin");
 let product = require("../../mongo/MeanStack_Project_DB/product");
 
-router.post("/addSubcathegory", async (req, res) => {
+router.post("/addSubcategory", async (req, res) => {
   let {
     error
-  } = product.subCathegoryValidationError(req.body);
+  } = product.subCategoryValidationError(req.body);
   if (error) {
     return res.status(402).send(error.details[0].message);
   }
 
   //To get rid of  duplicate items
-  let data = await product.subCathegory.findOne({
+  let data = await product.subCategory.findOne({
     name: req.body.name
   });
 
 
   if (data) {
     return res.status(402).send({
-      message: "Subcathegory already Exists"
+      message: "Subcategory already Exists"
     });
   }
 
   //Adding new subCathegories 
-  let subCat = new product.subCathegory({
+  let subCat = new product.subCategory({
     name: req.body.name
   });
 
@@ -36,16 +36,16 @@ router.post("/addSubcathegory", async (req, res) => {
     data: item
   });
 });
-router.post("/addCathegory", async (req, res) => {
+router.post("/addCategory", async (req, res) => {
   let {
     error
-  } = await product.cathegoryValidationError(req.body);
+  } = await product.categoryValidationError(req.body);
   if (error) {
     return res.status(402).send(error.details[0].message)
   }
 
-  //Getting rid of duplicate cathegories
-  let dupCat = await product.Cathegory.findOne({
+  //Getting rid of duplicate categories
+  let dupCat = await product.Category.findOne({
     'catName': req.body.catName
   });
 
@@ -58,7 +58,7 @@ router.post("/addCathegory", async (req, res) => {
   console.log(dupCat); //dupCat should be null
 
 
-  let subCat = await product.subCathegory.findOne({
+  let subCat = await product.subCategory.findOne({
     '_id': req.body.subCatId
   });
 
@@ -67,7 +67,7 @@ router.post("/addCathegory", async (req, res) => {
     return res.status(402).send('invalid Subcategory id')
   }
   //Adding new Category
-  let category = new product.Cathegory({
+  let category = new product.Category({
     catName: req.body.catName,
     subCat: {
       _id: subCat._id,
@@ -84,8 +84,8 @@ router.post("/addCathegory", async (req, res) => {
   })
 });
 
-router.get("/allCathegory", async (req, res) => {
-  let allCat = await product.Cathegory.find({});
+router.get("/allCategory", async (req, res) => {
+  let allCat = await product.Category.find({});
 
   if (!allCat) {
     return res.status(402).send({
@@ -96,8 +96,8 @@ router.get("/allCathegory", async (req, res) => {
   res.send(allCat);
 });
 
-router.get("/findCathegoryById/:_id", async (req, res) => {
-  let findCat = await product.Cathegory.findById(req.params._id);
+router.get("/findCategoryById/:_id", async (req, res) => {
+  let findCat = await product.Category.findById(req.params._id);
 
   if (!findCat) {
     return res.status(402).send({
@@ -108,8 +108,8 @@ router.get("/findCathegoryById/:_id", async (req, res) => {
   res.send(findCat);
 });
 
-router.delete("/deleteCathegoryById/:_id", async (req, res) => {
-  let Cat = await product.Cathegory.findOne({
+router.delete("/deleteCategoryById/:_id", async (req, res) => {
+  let Cat = await product.Category.findOne({
     _id: req.params._id
   });
 
@@ -118,7 +118,7 @@ router.delete("/deleteCathegoryById/:_id", async (req, res) => {
       message: "invalid id"
     });
   }
-  let delCat = await product.Cathegory.findByIdAndRemove({
+  let delCat = await product.Category.findByIdAndRemove({
     _id: req.params._id
   });
 
@@ -132,7 +132,7 @@ router.delete("/deleteCathegoryById/:_id", async (req, res) => {
 
 });
 
-router.post("/addProduct", [auth, admin], async (req, res) => {
+router.post("/addProduct", async (req, res) => {
   let {
     error
   } = product.productValidationError(req.body);
@@ -155,8 +155,8 @@ router.post("/addProduct", [auth, admin], async (req, res) => {
     offerPrice: req.body.offerPrice,
     isAvailable: req.body.isAvailable,
     isTodayOffer: req.body.isTodayOffer,
-    Cathegory: req.body.Cathegory,
-    subCathegory: req.body.subCathegory,
+    Category: req.body.Category,
+    subCategory: req.body.subCategory,
     isAdmin: req.body.isAdmin,
     recordDate: req.body.recordDate,
     updateDate: req.body.updateDate
@@ -191,8 +191,8 @@ router.put("/updateProduct/:_id", async (req, res) => {
   productUpdate.offerPrice = req.body.offerPrice;
   productUpdate.isAvailable = req.body.isAvailable;
   productUpdate.isTodayOffer = req.body.isTodayOffer;
-  productUpdate.Cathegory = req.body.Cathegory;
-  productUpdate.subCathegory = req.body.subCathegory;
+  productUpdate.Category = req.body.Category;
+  productUpdate.subCategory = req.body.subCategory;
   productUpdate.isAdmin = req.body.isAdmin;
   productUpdate.recordDate = req.body.recordDate;
   productUpdate.updateDate = req.body.updateDate;
@@ -240,11 +240,33 @@ router.get("/findProductById/:_id", async (req, res) => {
   res.send(items);
 });
 
-router.get("/pageIndexPagination", async (req, res) => {});
+//Product's Pagination
+router.get("/pageIndexPagination/:id", async (req, res) => {
+  let perPage = 10;
+  let page = req.params.id || 1;
+  let pageData = await product.Product.find({}).skip((perPage * page) - perPage).limit(perPage);
+
+  let dataCount = await product.Product.find({}).count();
+  let totalPages = Math.ceil(dataCount / perPage);
+
+  if (page > totalPages) {
+    return res.status(402).send('invalid id')
+  }
+
+  res.send({
+    perPage: perPage,
+    currentPage: page,
+    data: pageData,
+    dataCount: dataCount,
+    totalPages: totalPages
+  })
+});
 
 
 
-// router.get("/Cathegory/:Cathegory/Page/:pageIdx", async (req, res) => {});
+router.get("/Category/:Category/Page/:pageIdx", async (req, res) => {
+  let Cat = await product
+});
 
 // router.get(
 //   "/Cathegory/:Cathegory/subCathegory/:subCathegory/Page/:pageIdx",
