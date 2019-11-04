@@ -50,7 +50,8 @@ let userCartSchema = new mongoose.Schema({
     }
 })
 
-let userCart = mongoose.model('usercart', cartItemSchema, userCartSchema);
+let cartInfo = mongoose.model('cartInfo', cartItemSchema);
+let userCart = mongoose.model('usercart', userCartSchema);
 
 //Express Api Validation
 function cartItemValidationError(message) {
@@ -75,6 +76,7 @@ function userCartValidationError(message) {
 }
 
 module.exports = {
+    cartInfo,
     userCart,
     cartItemValidationError,
     userCartValidationError

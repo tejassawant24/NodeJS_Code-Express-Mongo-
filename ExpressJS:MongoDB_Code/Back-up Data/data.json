@@ -1,3 +1,4 @@
+//Registration of new user
 {
     "firstName": "Tejas",
     "lastName": "Sawant",
@@ -7,5 +8,19 @@
         "userPassword": "tejas123"
     },
     "termsAcceptCheck": true,
+    "isAdmin": true
+},
+
+//Add Product
+{
+    "name": "Charger",
+    "image": "bbdhbvh",
+    "description": "bhhdbd",
+    "price": 34,
+    "offerPrice": 45,
+    "isAvailable": true,
+    "isTodayOffer": true,
+    "Category": "Electronics",
+    "subCategory": "Apple",
     "isAdmin": true
 }
