@@ -31,7 +31,7 @@ router.post("/addSubcategory", async (req, res) => {
 
   //Saving Data
   let item = await subCat.save();
-  res.send({
+  return res.send({
     message: "Added Successfully",
     data: item
   });
@@ -62,7 +62,7 @@ router.post("/addCategory", async (req, res) => {
     '_id': req.body.subCatId
   });
 
-  console.log(subCat); //subCat should be null
+
   if (!subCat) {
     return res.status(402).send('invalid Subcategory id')
   }
@@ -78,7 +78,7 @@ router.post("/addCategory", async (req, res) => {
   //Saving Data
   let items = await category.save();
 
-  res.send({
+  return res.send({
     message: 'Category Added sucessfully',
     data: items
   })
@@ -97,7 +97,9 @@ router.get("/allCategory", async (req, res) => {
 });
 
 router.get("/findCategoryById/:_id", async (req, res) => {
-  let findCat = await product.Category.findById(req.params._id);
+  let findCat = await product.Category.findOne({
+    _id: req.params._id
+  });
 
   if (!findCat) {
     return res.status(402).send({
@@ -115,7 +117,7 @@ router.delete("/deleteCategoryById/:_id", async (req, res) => {
 
   if (!Cat) {
     return res.status(402).send({
-      message: "invalid id"
+      message: "invalid Category id"
     });
   }
   let delCat = await product.Category.findByIdAndRemove({
@@ -125,7 +127,7 @@ router.delete("/deleteCategoryById/:_id", async (req, res) => {
 
   //Saving Data
   let items = await delCat.save();
-  res.send({
+  return res.send({
     message: "delete Successful",
     data: items
   });
@@ -164,7 +166,7 @@ router.post("/addProduct", async (req, res) => {
 
   //Saving Data
   let data = await prodData.save();
-  res.send({
+  return res.send({
     message: "product added succesfully",
     data: data
   });
@@ -181,7 +183,7 @@ router.put("/updateProduct/:_id", async (req, res) => {
     _id: req.params._id
   });
   if (!product) {
-    return res.status(402).send("Invalid id");
+    return res.status(402).send("Invalid Product id");
   }
 
   productUpdate.name = req.body.name;
@@ -194,12 +196,11 @@ router.put("/updateProduct/:_id", async (req, res) => {
   productUpdate.Category = req.body.Category;
   productUpdate.subCategory = req.body.subCategory;
   productUpdate.isAdmin = req.body.isAdmin;
-  productUpdate.recordDate = req.body.recordDate;
-  productUpdate.updateDate = req.body.updateDate;
+
 
   //Saving Data
   let items = await productUpdate.save();
-  res.send({
+  return res.send({
     message: "Updated Successfully",
     data: items
   });
@@ -211,7 +212,7 @@ router.delete("/removeProduct/:_id", async (req, res) => {
   });
   if (!productDelete) {
     return res.send({
-      message: "Invalid id"
+      message: "Invalid Product id"
     });
   }
   let data = await productDelete.findByIdAndRemove({
@@ -220,7 +221,7 @@ router.delete("/removeProduct/:_id", async (req, res) => {
 
   //Saving data
   let item = await data.save();
-  res.send({
+  return res.send({
     message: "Deleted Successfully",
     data: items
   });
@@ -232,17 +233,51 @@ router.get("/findProductById/:_id", async (req, res) => {
   });
   if (!prodfind) {
     return res.status(402).send({
-      message: "Invalid id"
+      message: "Invalid Product id"
     });
   }
 
   let items = await prodfind.save();
-  res.send(items);
+  return res.send(items);
 });
+
+router.get("/latestProduct", async (req, res) => {
+  let latestProduct = await product.Product.find({
+    updateDate: {
+      $eq: Date.now()
+    }
+  })
+
+  if (!latestProduct) {
+    return res.status(402).send('No Latest Products!! Please comeback later! ')
+  }
+
+  return res.send({
+    message: 'Latest Products',
+    latestProduct: latestProduct
+  });
+
+});
+
+router.get("/offerProduct", async (req, res) => {
+  let offerProducts = await product.Product.find({
+    isTodayOffer: {
+      $eq: true
+    }
+  })
+
+  if (!offerProducts) {
+    return res.status(402).send('Currently, No offers Today. Please Comeback Later!')
+  }
+
+  return res.send(offerProducts);
+
+});
+
 
 //Product's Pagination
 router.get("/pageIndexPagination/:id", async (req, res) => {
-  let perPage = 10;
+  let perPage = 9;
   let page = req.params.id || 1;
   let pageData = await product.Product.find({}).skip((perPage * page) - perPage).limit(perPage);
 
@@ -250,10 +285,10 @@ router.get("/pageIndexPagination/:id", async (req, res) => {
   let totalPages = Math.ceil(dataCount / perPage);
 
   if (page > totalPages) {
-    return res.status(402).send('invalid id')
+    return res.status(402).send('invalid page id')
   }
 
-  res.send({
+  return res.send({
     perPage: perPage,
     currentPage: page,
     data: pageData,
@@ -263,18 +298,72 @@ router.get("/pageIndexPagination/:id", async (req, res) => {
 });
 
 
-
+//Category Pagination
 router.get("/Category/:Category/Page/:pageIdx", async (req, res) => {
-  let Cat = await product
+  let Cat = await product.Category.findOne({
+    _id: req.params.Category
+  });
+
+  if (!Cat) {
+    return res.status(402).send('invalid Category Id');
+  }
+
+  //Chosen Category Pagination
+  let perPage = 9;
+  let page = req.params.pageIdx || 1;
+  let pageData = await Cat.find({}).skip((perPage * page) - perPage).limit(perPage);
+
+  let dataCount = await Cat.find({}).count();
+  let totalPages = Math.ceil(dataCount / perPage);
+
+  if (page > totalPages) {
+    return res.status(402).send('invalid page id');
+  }
+
+  return res.send({
+    perPage: perPage,
+    currentPage: page,
+    data: pageData,
+    dataCount: dataCount,
+    totalPages: totalPages
+
+  })
+
 });
 
-// router.get(
-//   "/Cathegory/:Cathegory/subCathegory/:subCathegory/Page/:pageIdx",
-//   async (req, res) => {}
-// );
 
-// router.get("/latestProduct", async (req, res) => {});
+//Sub-Category Pagination
+router.get("/Category/:Category/subCategory/:subCategory/Page/:pageIdx", async (req, res) => {
+  let Cat = await product.Category.findOne({
+    _id: req.params.Category
+  });
+  if (!Cat) {
+    return res.status(402).send('Invalid Category Id');
+  }
 
-// router.get("/offerProduct", async (req, res) => {});
+  let subCat = await product.Category.findOne({
+    subCatId: req.params.subCategory
+  })
+
+  if (!subCat) {
+    return res.status(402).send('Invalid Subcategory Id')
+  }
+
+  let perPage = 9;
+  let page = req.params.pageIdx || 1;
+  let pageData = await subCat.find({}).skip((perPage * page) - perPage).limit(perPage);
+
+  let dataCount = await subCat.find({}).count();
+  let totalPages = Math.ceil(dataCount / perPage);
+
+  return res.send({
+    perPage: perPage,
+    currentPage: page,
+    data: pageData,
+    dataCount: dataCount,
+    totalPages: totalPages
+  })
+});
+
 
 module.exports = router;
