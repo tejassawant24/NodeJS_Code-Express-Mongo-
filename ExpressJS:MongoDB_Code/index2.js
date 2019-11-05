@@ -2,20 +2,28 @@ const express = require('express');
 const app = express();
 const config = require('config');
 app.use(express.json());
+
+//User Info
 let user = require('../ExpressJS:MongoDB_Code/routes/MeanStack_Project_Middleware/user.routes');
+//User Authentication
 let auth = require('./auth/auth');
+
 //Forget Password
 let mailer = require('../ExpressJS:MongoDB_Code/routes/sendUsermail');
 let forgetPassword = require('./routes/forgotpassword');
 
 //Product Info
-let product = require('./routes/MeanStack_Project_Middleware/productInfo.routes')
+let product = require('./routes/MeanStack_Project_Middleware/productInfo.routes');
+
+//Cart Info
+let cartDetails = require('./routes/MeanStack_Project_Middleware/userCart.routes')
 
 app.use('/api/consumer', user);
 app.use('/api/consumer', auth);
 app.use('/api/consumer/chat', mailer);
 app.use('/api/consumer/chat', forgetPassword);
 app.use('/api', product);
+app.use('/api', cartDetails);
 
 //If user does not have token
 if (!config.get('usertoken')) {
