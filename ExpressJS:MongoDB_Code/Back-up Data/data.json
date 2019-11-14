@@ -24,3 +24,13 @@
     "subCategory": "Apple",
     "isAdmin": true
 }
+
+//Add to Cart
+{
+    "prodId": "wefe123",
+    "name": "Tv",
+    "image": "jnjnjnjj",
+    "price": 4200,
+    "quantity": 2,
+    "totalPrice": 8400
+}
